@@ -46,8 +46,10 @@ export function SearchClient({ projects }: { projects: Pick<Project, "id" | "nam
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [showDateFilter, setShowDateFilter] = useState(false);
 
   const hasFilters = Boolean(query || projectId || docType || dateFrom || dateTo);
+  const hasDateFilter = Boolean(dateFrom || dateTo);
 
   const params = useMemo(() => {
     const p = new URLSearchParams();
@@ -95,6 +97,7 @@ export function SearchClient({ projects }: { projects: Pick<Project, "id" | "nam
     setDocType(null);
     setDateFrom("");
     setDateTo("");
+    setShowDateFilter(false);
   }
 
   return (
@@ -119,10 +122,17 @@ export function SearchClient({ projects }: { projects: Pick<Project, "id" | "nam
               onClick={() => setDocType(docType === t ? null : t)}
             />
           ))}
+          <FilterChip
+            label={hasDateFilter ? "Khoảng thời gian ●" : "Khoảng thời gian"}
+            active={showDateFilter || hasDateFilter}
+            onClick={() => setShowDateFilter((v) => !v)}
+          />
           {hasFilters && <FilterChip label="Xóa lọc" active={false} onClick={clearFilters} />}
         </div>
+      </div>
 
-        <div className="flex gap-3">
+      {showDateFilter && (
+        <div className="flex flex-col gap-3 rounded-md border border-line bg-paper-raised p-3 sm:flex-row">
           <div className="flex-1 space-y-1">
             <Label>Từ ngày</Label>
             <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
@@ -132,7 +142,7 @@ export function SearchClient({ projects }: { projects: Pick<Project, "id" | "nam
             <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
           </div>
         </div>
-      </div>
+      )}
 
       {!hasFilters && (
         <EmptyState
