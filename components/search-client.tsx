@@ -105,29 +105,35 @@ export function SearchClient({ projects }: { projects: Pick<Project, "id" | "nam
       <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-paper px-4 pb-3 pt-1 lg:static lg:mx-0 lg:px-0">
         <SearchBar value={query} onChange={setQuery} />
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {projects.map((p) => (
+        <div className="relative -mr-4">
+          <div className="flex gap-2 overflow-x-auto pb-1 pr-8">
+            {projects.map((p) => (
+              <FilterChip
+                key={p.id}
+                label={p.name}
+                active={projectId === p.id}
+                onClick={() => setProjectId(projectId === p.id ? null : p.id)}
+              />
+            ))}
+            {DOC_TYPE_OPTIONS.map((t) => (
+              <FilterChip
+                key={t}
+                label={DOC_TYPE_LABEL[t]}
+                active={docType === t}
+                onClick={() => setDocType(docType === t ? null : t)}
+              />
+            ))}
             <FilterChip
-              key={p.id}
-              label={p.name}
-              active={projectId === p.id}
-              onClick={() => setProjectId(projectId === p.id ? null : p.id)}
+              label={hasDateFilter ? "Khoảng thời gian ●" : "Khoảng thời gian"}
+              active={showDateFilter || hasDateFilter}
+              onClick={() => setShowDateFilter((v) => !v)}
             />
-          ))}
-          {DOC_TYPE_OPTIONS.map((t) => (
-            <FilterChip
-              key={t}
-              label={DOC_TYPE_LABEL[t]}
-              active={docType === t}
-              onClick={() => setDocType(docType === t ? null : t)}
-            />
-          ))}
-          <FilterChip
-            label={hasDateFilter ? "Khoảng thời gian ●" : "Khoảng thời gian"}
-            active={showDateFilter || hasDateFilter}
-            onClick={() => setShowDateFilter((v) => !v)}
+            {hasFilters && <FilterChip label="Xóa lọc" active={false} onClick={clearFilters} />}
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-0 top-0 h-9 w-8 bg-gradient-to-l from-paper to-transparent lg:hidden"
           />
-          {hasFilters && <FilterChip label="Xóa lọc" active={false} onClick={clearFilters} />}
         </div>
       </div>
 
