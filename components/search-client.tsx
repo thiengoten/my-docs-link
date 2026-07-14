@@ -125,6 +125,7 @@ export function SearchClient({ projects }: { projects: Pick<Project, "id" | "nam
           <FilterChip
             label={hasDateFilter ? "Khoảng thời gian ●" : "Khoảng thời gian"}
             active={showDateFilter || hasDateFilter}
+            expanded={showDateFilter}
             onClick={() => setShowDateFilter((v) => !v)}
           />
           {hasFilters && <FilterChip label="Xóa lọc" active={false} onClick={clearFilters} />}
