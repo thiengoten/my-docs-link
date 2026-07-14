@@ -26,5 +26,9 @@ export function Select({
 }
 
 export function FieldError({ children }: { children: React.ReactNode }) {
-  return <p className="text-caption text-stamp">{children}</p>;
+  return (
+    <p role="alert" aria-atomic="true" className="text-caption text-stamp">
+      {children}
+    </p>
+  );
 }

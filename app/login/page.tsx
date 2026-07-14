@@ -6,6 +6,18 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
 
+function getLoginErrorMessage(error: { code?: string }) {
+  if (error.code === "invalid_credentials") {
+    return "Email hoặc mật khẩu không đúng.";
+  }
+
+  if (error.code === "email_not_confirmed") {
+    return "Email chưa được xác nhận. Vui lòng kiểm tra hộp thư.";
+  }
+
+  return "Không thể đăng nhập. Vui lòng thử lại.";
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -27,7 +39,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      setError(error.message);
+      setError(getLoginErrorMessage(error));
       return;
     }
 
