@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { createShareLink } from "@/lib/actions/share-links";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select, FieldError } from "@/components/ui/input";
@@ -30,6 +30,13 @@ export function ShareLinkFormDialog({ projects }: { projects: ProjectOption[] })
     setOpen(false);
     dialogRef.current?.close();
   }
+
+  useEffect(() => {
+    if (state.success) {
+      closeDialog();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   if (projects.length === 0) return null;
 

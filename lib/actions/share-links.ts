@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export interface ShareLinkFormState {
   error: string | null;
+  success?: boolean;
 }
 
 export async function createShareLink(
@@ -33,7 +34,7 @@ export async function createShareLink(
   }
 
   revalidatePath("/dashboard/share-links");
-  return { error: null };
+  return { error: null, success: true };
 }
 
 export async function revokeShareLink(linkId: string) {
