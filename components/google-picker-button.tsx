@@ -25,6 +25,9 @@ const DOC_TYPE_OPTIONS: { value: DocType; label: string }[] = [
 
 type PickedFile = { id: string; name: string; webViewLink?: string };
 
+const LEGAL_DATE_REQUIRED_ERROR =
+  "Tài liệu pháp lý cần có ngày để xếp vào timeline. Vui lòng nhập ngày tài liệu.";
+
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) {
@@ -93,6 +96,10 @@ export function GooglePickerButton({ projectId }: { projectId: string }) {
 
   async function confirmSave() {
     if (!pickedFile) return;
+    if (docType === "legal" && !documentDate.trim()) {
+      setErrorMessage(LEGAL_DATE_REQUIRED_ERROR);
+      return;
+    }
     setSaving(true);
     const { error } = await createDocument(
       projectId,
@@ -144,7 +151,10 @@ export function GooglePickerButton({ projectId }: { projectId: string }) {
           <span className="text-body text-ink">{pickedFile.name}</span>
           <Select
             value={docType}
-            onChange={(e) => setDocType(e.target.value as DocType)}
+            onChange={(e) => {
+              setDocType(e.target.value as DocType);
+              setErrorMessage(null);
+            }}
             className="h-9 w-auto"
           >
             {DOC_TYPE_OPTIONS.map((opt) => (
@@ -154,12 +164,18 @@ export function GooglePickerButton({ projectId }: { projectId: string }) {
             ))}
           </Select>
           {docType === "legal" && (
-            <Input
-              type="date"
-              value={documentDate}
-              onChange={(e) => setDocumentDate(e.target.value)}
-              className="h-9 w-auto"
-            />
+            <div className="flex items-center gap-1">
+              <span className="text-caption text-stamp">Ngày tài liệu * bắt buộc</span>
+              <Input
+                type="date"
+                value={documentDate}
+                onChange={(e) => {
+                  setDocumentDate(e.target.value);
+                  setErrorMessage(null);
+                }}
+                className="h-9 w-auto"
+              />
+            </div>
           )}
           <Button size="sm" onClick={confirmSave} loading={saving}>
             {saving ? "Đang lưu..." : "Lưu vào dự án"}

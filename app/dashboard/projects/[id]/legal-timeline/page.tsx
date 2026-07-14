@@ -29,7 +29,7 @@ export default async function LegalTimelinePage({
     .select("*")
     .eq("project_id", id)
     .eq("doc_type", "legal")
-    .order("document_date", { ascending: false });
+    .order("document_date", { ascending: false, nullsFirst: false });
 
   return (
     <div className="space-y-6">

@@ -22,11 +22,17 @@ const STATUS_OPTIONS: { value: DocumentStatus; label: string }[] = [
   { value: "archived", label: "Lưu trữ" },
 ];
 
+const LEGAL_DATE_REQUIRED_ERROR =
+  "Tài liệu pháp lý cần có ngày để xếp vào timeline. Vui lòng nhập ngày tài liệu.";
+
 export function DocumentEditDialog({ document }: { document: Document }) {
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const action = updateDocument.bind(null, document.id, document.project_id);
   const [state, formAction, pending] = useActionState(action, { error: null });
+  const [docType, setDocType] = useState<DocType>(document.doc_type);
+  const [documentDate, setDocumentDate] = useState(document.document_date ?? "");
+  const [dateError, setDateError] = useState<string | null>(null);
 
   function openDialog() {
     setOpen(true);
@@ -36,6 +42,13 @@ export function DocumentEditDialog({ document }: { document: Document }) {
   function closeDialog() {
     setOpen(false);
     dialogRef.current?.close();
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (docType === "legal" && !documentDate.trim()) {
+      e.preventDefault();
+      setDateError(LEGAL_DATE_REQUIRED_ERROR);
+    }
   }
 
   return (
@@ -52,7 +65,7 @@ export function DocumentEditDialog({ document }: { document: Document }) {
         {open && (
           <>
             <SheetHandle />
-            <form action={formAction} className="space-y-4 p-6">
+            <form action={formAction} onSubmit={handleSubmit} className="space-y-4 p-6">
               <div>
                 <h2 className="font-display text-title font-bold text-ink">Sửa tài liệu</h2>
                 <p className="text-caption text-slate">{document.file_name}</p>
@@ -60,7 +73,11 @@ export function DocumentEditDialog({ document }: { document: Document }) {
 
               <div className="space-y-1">
                 <Label>Loại tài liệu</Label>
-                <Select name="doc_type" defaultValue={document.doc_type}>
+                <Select
+                  name="doc_type"
+                  value={docType}
+                  onChange={(e) => setDocType(e.target.value as DocType)}
+                >
                   {DOC_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
@@ -81,12 +98,20 @@ export function DocumentEditDialog({ document }: { document: Document }) {
               </div>
 
               <div className="space-y-1">
-                <Label>Ngày tài liệu</Label>
+                <Label>
+                  Ngày tài liệu
+                  {docType === "legal" && <span className="text-stamp"> * bắt buộc</span>}
+                </Label>
                 <Input
                   type="date"
                   name="document_date"
-                  defaultValue={document.document_date ?? ""}
+                  value={documentDate}
+                  onChange={(e) => {
+                    setDocumentDate(e.target.value);
+                    if (dateError) setDateError(null);
+                  }}
                 />
+                {dateError && <FieldError>{dateError}</FieldError>}
               </div>
 
               <div className="space-y-1">

@@ -12,6 +12,18 @@ export interface DocumentFormState {
   error: string | null;
 }
 
+const LEGAL_DATE_REQUIRED_ERROR =
+  "Tài liệu pháp lý cần có ngày để xếp vào timeline. Vui lòng nhập ngày tài liệu.";
+
+// Never trust the client: doc_type can change to "legal" via the edit dialog,
+// so this must run on every write path (create and update), not just create.
+function validateDocumentDate(docType: DocType, documentDate: string | null): string | null {
+  if (docType === "legal" && !documentDate) {
+    return LEGAL_DATE_REQUIRED_ERROR;
+  }
+  return null;
+}
+
 // Best-effort: PDF text extraction failing (unsupported file type, quota,
 // missing Drive connection) must never block the document from being saved.
 async function extractAndStoreText(
@@ -42,6 +54,12 @@ export async function createDocument(
   docType: DocType,
   documentDate?: string | null
 ): Promise<{ error: string | null }> {
+  const normalizedDate = documentDate?.trim() || null;
+  const validationError = validateDocumentDate(docType, normalizedDate);
+  if (validationError) {
+    return { error: validationError };
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("documents")
@@ -51,7 +69,7 @@ export async function createDocument(
       drive_web_view_link: file.webViewLink ?? null,
       file_name: file.name,
       doc_type: docType,
-      document_date: documentDate?.trim() || null,
+      document_date: normalizedDate,
     })
     .select("id")
     .single();
@@ -81,6 +99,11 @@ export async function updateDocument(
   const status = String(formData.get("status") ?? "active") as DocumentStatus;
   const note = String(formData.get("note") ?? "").trim() || null;
   const document_date = String(formData.get("document_date") ?? "").trim() || null;
+
+  const validationError = validateDocumentDate(doc_type, document_date);
+  if (validationError) {
+    return { error: validationError };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
