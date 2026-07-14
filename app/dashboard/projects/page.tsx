@@ -21,14 +21,10 @@ const STATUS_CLASS: Record<ProjectStatus, string> = {
 export default async function ProjectsPage() {
   const supabase = await createClient();
 
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  const { data: documents } = await supabase
-    .from("documents")
-    .select("project_id, doc_type");
+  const [{ data: projects }, { data: documents }] = await Promise.all([
+    supabase.from("projects").select("*").order("created_at", { ascending: false }),
+    supabase.from("documents").select("project_id, doc_type"),
+  ]);
 
   const countsByProject = new Map<string, Map<DocType, number>>();
   for (const doc of documents ?? []) {

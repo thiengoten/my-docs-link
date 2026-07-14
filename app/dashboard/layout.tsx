@@ -8,9 +8,13 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
+  // proxy.ts already runs auth.getUser() (server-verified) to gate every
+  // /dashboard request, so this only needs the cookie-derived session for
+  // display — avoids a second Auth round-trip on every tab navigation.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
 
   return (
     <div className="flex min-h-dvh flex-1">

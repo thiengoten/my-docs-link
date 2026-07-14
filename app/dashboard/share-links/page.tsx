@@ -9,20 +9,11 @@ import { CopyShareLinkButton } from "@/components/copy-share-link-button";
 export default async function ShareLinksPage() {
   const supabase = await createClient();
 
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("id, name")
-    .order("name");
-
-  const { data: documents } = await supabase
-    .from("documents")
-    .select("id, file_name, project_id")
-    .order("file_name");
-
-  const { data: shareLinks } = await supabase
-    .from("share_links")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [{ data: projects }, { data: documents }, { data: shareLinks }] = await Promise.all([
+    supabase.from("projects").select("id, name").order("name"),
+    supabase.from("documents").select("id, file_name, project_id").order("file_name"),
+    supabase.from("share_links").select("*").order("created_at", { ascending: false }),
+  ]);
 
   const projectOptions = (projects ?? []).map((p) => ({
     id: p.id,
