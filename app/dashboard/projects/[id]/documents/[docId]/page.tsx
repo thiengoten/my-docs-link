@@ -55,7 +55,11 @@ export default async function DocumentDetailPage({
         </div>
         <div className="flex items-center gap-3">
           <DocumentEditDialog document={document} />
-          <DeleteDocumentButton documentId={document.id} projectId={id} />
+          <DeleteDocumentButton
+            documentId={document.id}
+            projectId={id}
+            fileName={document.file_name}
+          />
         </div>
       </div>
 

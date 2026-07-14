@@ -55,7 +55,11 @@ export function DocumentList({ documents }: { documents: Document[] }) {
 
             <div className="relative z-10 mt-3 flex items-center gap-3">
               <DocumentEditDialog document={doc} />
-              <DeleteDocumentButton documentId={doc.id} projectId={doc.project_id} />
+              <DeleteDocumentButton
+                documentId={doc.id}
+                projectId={doc.project_id}
+                fileName={doc.file_name}
+              />
             </div>
           </div>
         );

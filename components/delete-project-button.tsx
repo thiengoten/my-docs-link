@@ -1,23 +1,50 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { deleteProject } from "@/lib/actions/projects";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
-export function DeleteProjectButton({ projectId }: { projectId: string }) {
+export function DeleteProjectButton({
+  projectId,
+  documentCount = 0,
+  shareLinkCount = 0,
+}: {
+  projectId: string;
+  documentCount?: number;
+  shareLinkCount?: number;
+}) {
+  const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  function handleClick() {
-    const confirmed = window.confirm(
-      "Xóa dự án này sẽ xóa toàn bộ liên kết tài liệu, link chia sẻ và lịch sử pháp lý liên quan. Bạn có chắc chắn muốn xóa?"
-    );
-    if (!confirmed) return;
-    startTransition(() => deleteProject(projectId));
+  function handleConfirm() {
+    startTransition(async () => {
+      await deleteProject(projectId);
+      setOpen(false);
+    });
   }
 
+  const details = [
+    `${documentCount} tài liệu sẽ bị gỡ liên kết`,
+    `${shareLinkCount} link chia sẻ sẽ bị thu hồi`,
+    "Toàn bộ lịch sử pháp lý liên quan sẽ bị xóa",
+  ];
+
   return (
-    <Button variant="destructive" size="sm" loading={pending} onClick={handleClick}>
-      {pending ? "Đang xóa..." : "Xóa dự án"}
-    </Button>
+    <>
+      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+        Xóa dự án
+      </Button>
+      <ConfirmDialog
+        open={open}
+        title="Xóa dự án này?"
+        description="Hành động này không thể hoàn tác. Khi xóa, những dữ liệu sau cũng mất theo:"
+        details={details}
+        confirmLabel="Xóa dự án"
+        pending={pending}
+        onConfirm={handleConfirm}
+        onCancel={() => setOpen(false)}
+      />
+    </>
   );
 }

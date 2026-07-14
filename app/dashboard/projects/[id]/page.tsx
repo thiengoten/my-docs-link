@@ -46,11 +46,18 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const { data: documents } = await supabase
-    .from("documents")
-    .select("*")
-    .eq("project_id", id)
-    .order("created_at", { ascending: false });
+  const [{ data: documents }, { count: shareLinkCount }] = await Promise.all([
+    supabase
+      .from("documents")
+      .select("*")
+      .eq("project_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("share_links")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", id)
+      .eq("revoked", false),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -78,7 +85,11 @@ export default async function ProjectDetailPage({
         </div>
         <div className="flex gap-2">
           <ProjectFormDialog mode="edit" project={project} />
-          <DeleteProjectButton projectId={project.id} />
+          <DeleteProjectButton
+            projectId={project.id}
+            documentCount={documents?.length ?? 0}
+            shareLinkCount={shareLinkCount ?? 0}
+          />
         </div>
       </div>
 
