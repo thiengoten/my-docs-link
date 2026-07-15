@@ -74,8 +74,21 @@ export function GooglePickerButton({ projectId }: { projectId: string }) {
       await loadScript("https://apis.google.com/js/api.js");
       await new Promise<void>((resolve) => window.gapi.load("picker", () => resolve()));
 
+      const myDriveView = new window.google.picker.DocsView(window.google.picker.ViewId.DOCS)
+        .setIncludeFolders(true)
+        .setSelectFolderEnabled(false)
+        .setParent("root")
+        .setLabel("My Drive");
+
+      const sharedWithMeView = new window.google.picker.DocsView(window.google.picker.ViewId.DOCS)
+        .setIncludeFolders(true)
+        .setSelectFolderEnabled(false)
+        .setOwnedByMe(false)
+        .setLabel("Shared with me");
+
       const picker = new window.google.picker.PickerBuilder()
-        .addView(window.google.picker.ViewId.DOCS)
+        .addView(myDriveView)
+        .addView(sharedWithMeView)
         .setOAuthToken(accessToken)
         .setDeveloperKey(process.env.NEXT_PUBLIC_GOOGLE_API_KEY)
         .setCallback((data: any) => {
