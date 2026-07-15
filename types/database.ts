@@ -1,4 +1,10 @@
-export type ProjectStatus = "active" | "completed" | "on_hold";
+export type ProjectStatus =
+  | "planning"
+  | "construction"
+  | "active"
+  | "handover"
+  | "completed"
+  | "on_hold";
 
 export type DocType =
   | "legal"

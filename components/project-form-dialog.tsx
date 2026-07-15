@@ -8,7 +8,10 @@ import { Input, Label, Select, Textarea, FieldError } from "@/components/ui/inpu
 import { sheetDialogClass, SheetHandle } from "@/components/ui/sheet";
 
 const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
-  { value: "active", label: "Đang hoạt động" },
+  { value: "planning", label: "Đang triển khai" },
+  { value: "construction", label: "Đang thi công" },
+  { value: "active", label: "Đang mở bán" },
+  { value: "handover", label: "Đang bàn giao" },
   { value: "completed", label: "Hoàn thành" },
   { value: "on_hold", label: "Tạm dừng" },
 ];

@@ -7,15 +7,21 @@ import { DOC_TYPE_LABEL } from "@/components/ui/badge";
 import type { DocType, ProjectStatus } from "@/types/database";
 
 const STATUS_LABEL: Record<ProjectStatus, string> = {
-  active: "Đang hoạt động",
+  planning: "Đang triển khai",
+  construction: "Đang thi công",
+  active: "Đang mở bán",
+  handover: "Đang bàn giao",
   completed: "Hoàn thành",
   on_hold: "Tạm dừng",
 };
 
 const STATUS_CLASS: Record<ProjectStatus, string> = {
+  planning: "border border-line bg-paper text-ink-soft",
+  construction: "bg-amber-soft text-amber",
   active: "bg-jade-soft text-jade",
-  on_hold: "bg-amber-soft text-amber",
+  handover: "bg-ink text-paper-raised",
   completed: "bg-line text-slate",
+  on_hold: "bg-stamp-soft text-stamp",
 };
 
 export default async function ProjectsPage() {

@@ -5,7 +5,10 @@ import { DocTypeBadge, StatusBadge } from "@/components/ui/badge";
 import { VerificationStamp } from "@/components/ui/verification-stamp";
 
 const STATUS_LABEL: Record<string, string> = {
-  active: "Đang hoạt động",
+  planning: "Đang triển khai",
+  construction: "Đang thi công",
+  active: "Đang mở bán",
+  handover: "Đang bàn giao",
   completed: "Hoàn thành",
   on_hold: "Tạm dừng",
 };
