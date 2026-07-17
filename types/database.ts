@@ -16,6 +16,14 @@ export type DocType =
 
 export type DocumentStatus = "active" | "superseded" | "archived";
 
+export type DealStage =
+  | "lead"
+  | "viewing"
+  | "deposit"
+  | "contract"
+  | "closed"
+  | "lost";
+
 export type Project = {
   id: string;
   name: string;
@@ -40,6 +48,26 @@ export type Document = {
   extracted_text_raw: string | null;
   superseded_by: string | null;
   document_date: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Customer = {
+  id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Deal = {
+  id: string;
+  customer_id: string;
+  project_id: string;
+  stage: DealStage;
+  note: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -101,6 +129,18 @@ export type Database = {
         Row: ShareLink;
         Insert: Partial<ShareLink> & { project_id: string; token: string };
         Update: Partial<ShareLink>;
+        Relationships: [];
+      };
+      customers: {
+        Row: Customer;
+        Insert: Partial<Customer> & { name: string };
+        Update: Partial<Customer>;
+        Relationships: [];
+      };
+      deals: {
+        Row: Deal;
+        Insert: Partial<Deal> & { customer_id: string; project_id: string };
+        Update: Partial<Deal>;
         Relationships: [];
       };
       google_auth_tokens: {
@@ -166,6 +206,7 @@ export type Database = {
       project_status: ProjectStatus;
       doc_type: DocType;
       document_status: DocumentStatus;
+      deal_stage: DealStage;
     };
     CompositeTypes: Record<string, never>;
   };

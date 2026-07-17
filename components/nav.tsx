@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Search, Stamp, Share2 } from "lucide-react";
+import { Building2, Search, Stamp, Share2, Users, Waypoints } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard/projects", label: "Dự án", icon: Building2 },
+  { href: "/dashboard/customers", label: "Khách hàng", icon: Users },
+  { href: "/dashboard/graph", label: "Sơ đồ", icon: Waypoints },
   { href: "/dashboard/search", label: "Tìm kiếm", icon: Search },
   { href: "/dashboard/legal", label: "Pháp lý", icon: Stamp },
   { href: "/dashboard/share-links", label: "Chia sẻ", icon: Share2 },

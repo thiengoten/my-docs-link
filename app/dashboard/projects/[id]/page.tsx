@@ -6,6 +6,7 @@ import { DeleteProjectButton } from "@/components/delete-project-button";
 import { GooglePickerButton } from "@/components/google-picker-button";
 import { DocumentList } from "@/components/document-list";
 import { FieldError } from "@/components/ui/input";
+import { DealStageBadge } from "@/components/ui/badge";
 import type { ProjectStatus } from "@/types/database";
 
 const GOOGLE_ERROR_LABEL: Record<string, string> = {
@@ -52,18 +53,30 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const [{ data: documents }, { count: shareLinkCount }] = await Promise.all([
-    supabase
-      .from("documents")
-      .select("*")
-      .eq("project_id", id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("share_links")
-      .select("id", { count: "exact", head: true })
-      .eq("project_id", id)
-      .eq("revoked", false),
-  ]);
+  const [{ data: documents }, { count: shareLinkCount }, { data: deals }] =
+    await Promise.all([
+      supabase
+        .from("documents")
+        .select("*")
+        .eq("project_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("share_links")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", id)
+        .eq("revoked", false),
+      supabase
+        .from("deals")
+        .select("*")
+        .eq("project_id", id)
+        .order("created_at", { ascending: false }),
+    ]);
+
+  const customerIds = [...new Set((deals ?? []).map((d) => d.customer_id))];
+  const { data: customers } = customerIds.length
+    ? await supabase.from("customers").select("id, name").in("id", customerIds)
+    : { data: [] };
+  const customerById = new Map((customers ?? []).map((c) => [c.id, c]));
 
   return (
     <div className="space-y-6">
@@ -122,6 +135,32 @@ export default async function ProjectDetailPage({
 
         <DocumentList documents={documents ?? []} />
       </div>
+
+      {!!deals?.length && (
+        <div className="space-y-3">
+          <h2 className="font-display text-subtitle font-semibold text-ink">
+            Khách quan tâm
+          </h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {deals.map((deal) => {
+              const customer = customerById.get(deal.customer_id);
+              if (!customer) return null;
+              return (
+                <Link
+                  key={deal.id}
+                  href={`/dashboard/customers/${customer.id}`}
+                  className="flex items-center justify-between gap-2 rounded-md border border-line bg-paper-raised p-4 shadow-1 hover:border-ink-soft"
+                >
+                  <span className="truncate font-display text-body font-semibold text-ink">
+                    {customer.name}
+                  </span>
+                  <DealStageBadge stage={deal.stage} />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { DocType, DocumentStatus } from "@/types/database";
+import type { DealStage, DocType, DocumentStatus } from "@/types/database";
 
 export const DOC_TYPE_LABEL: Record<DocType, string> = {
   legal: "Pháp lý",
@@ -49,6 +49,34 @@ export function StatusBadge({ status }: { status: DocumentStatus }) {
     >
       <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[status]}`} />
       {STATUS_LABEL[status]}
+    </span>
+  );
+}
+
+export const DEAL_STAGE_LABEL: Record<DealStage, string> = {
+  lead: "Tiềm năng",
+  viewing: "Đang xem",
+  deposit: "Đặt cọc",
+  contract: "Ký hợp đồng",
+  closed: "Đã chốt",
+  lost: "Đã mất",
+};
+
+const DEAL_STAGE_CLASS: Record<DealStage, string> = {
+  lead: "border border-line bg-paper text-ink-soft",
+  viewing: "bg-amber-soft text-amber",
+  deposit: "bg-amber-soft text-amber",
+  contract: "bg-jade-soft text-jade",
+  closed: "bg-jade-soft text-jade",
+  lost: "bg-stamp-soft text-stamp",
+};
+
+export function DealStageBadge({ stage }: { stage: DealStage }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-sm px-2 py-0.5 text-label font-display uppercase tracking-wide ${DEAL_STAGE_CLASS[stage]}`}
+    >
+      {DEAL_STAGE_LABEL[stage]}
     </span>
   );
 }
