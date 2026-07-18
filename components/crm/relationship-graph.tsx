@@ -329,17 +329,44 @@ export function RelationshipGraph({
   }, []);
 
   // Kéo node & pan nền.
-  const dragRef = useRef<{ id: string; moved: boolean } | null>(null);
+  // Ngưỡng (px màn hình) trước khi một cú chạm được coi là "kéo" thay vì "bấm" —
+  // cần thiết cho cảm ứng vì ngón tay luôn rung nhẹ vài px khi tap.
+  const DRAG_THRESHOLD = 6;
+  const dragRef = useRef<{ id: string; moved: boolean; startX: number; startY: number } | null>(
+    null
+  );
   // Giữ trạng thái "đã kéo" tới sau onClick để phân biệt click với kéo.
   const movedRef = useRef(false);
   const panRef = useRef<{ startX: number; startY: number; vbx: number; vby: number } | null>(
     null
   );
+  // Theo dõi các pointer đang chạm trên nền để nhận diện pinch-zoom 2 ngón.
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchRef = useRef<{ lastDist: number } | null>(null);
+
+  const applyZoom = useCallback(
+    (clientX: number, clientY: number, factor: number) => {
+      const p = toGraph(clientX, clientY);
+      setViewBox((vb) => {
+        const w = Math.min(WIDTH * 3, Math.max(WIDTH * 0.15, vb.w * factor));
+        const h = Math.min(HEIGHT * 3, Math.max(HEIGHT * 0.15, vb.h * factor));
+        // Giữ điểm dưới con trỏ/giữa 2 ngón cố định.
+        const x = p.x - ((p.x - vb.x) * w) / vb.w;
+        const y = p.y - ((p.y - vb.y) * h) / vb.h;
+        return { x, y, w, h };
+      });
+    },
+    [toGraph]
+  );
 
   function onNodePointerDown(e: React.PointerEvent, id: string) {
     e.stopPropagation();
-    (e.target as Element).setPointerCapture(e.pointerId);
-    dragRef.current = { id, moved: false };
+    try {
+      (e.target as Element).setPointerCapture(e.pointerId);
+    } catch {
+      // Bỏ qua: một số trình duyệt/thao tác giả lập không có pointer đang hoạt động.
+    }
+    dragRef.current = { id, moved: false, startX: e.clientX, startY: e.clientY };
     movedRef.current = false;
     const p = toGraph(e.clientX, e.clientY);
     const nd = simRef.current.get(id);
@@ -351,15 +378,31 @@ export function RelationshipGraph({
   }
 
   function onPointerMove(e: React.PointerEvent) {
-    if (dragRef.current) {
-      dragRef.current.moved = true;
-      movedRef.current = true;
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+    if (pinchRef.current && pointersRef.current.size >= 2) {
       userMovedRef.current = true;
+      const pts = [...pointersRef.current.values()].slice(0, 2);
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+      const factor = pinchRef.current.lastDist / dist;
+      applyZoom((pts[0].x + pts[1].x) / 2, (pts[0].y + pts[1].y) / 2, factor);
+      pinchRef.current.lastDist = dist;
+      return;
+    }
+    if (dragRef.current) {
       const p = toGraph(e.clientX, e.clientY);
       const nd = simRef.current.get(dragRef.current.id);
       if (nd) {
         nd.fx = p.x;
         nd.fy = p.y;
+      }
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      if (Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+        dragRef.current.moved = true;
+        movedRef.current = true;
+        userMovedRef.current = true;
       }
       reheat(0.2);
       return;
@@ -396,6 +439,20 @@ export function RelationshipGraph({
   }
 
   function onBackgroundPointerDown(e: React.PointerEvent) {
+    try {
+      (e.currentTarget as Element).setPointerCapture(e.pointerId);
+    } catch {
+      // Bỏ qua: một số trình duyệt/thao tác giả lập không có pointer đang hoạt động.
+    }
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointersRef.current.size === 2) {
+      panRef.current = null;
+      const pts = [...pointersRef.current.values()];
+      pinchRef.current = {
+        lastDist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1,
+      };
+      return;
+    }
     panRef.current = {
       startX: e.clientX,
       startY: e.clientY,
@@ -404,22 +461,18 @@ export function RelationshipGraph({
     };
   }
 
-  function onPointerUp() {
+  function onPointerUp(e: React.PointerEvent) {
+    pointersRef.current.delete(e.pointerId);
+    if (pointersRef.current.size < 2) {
+      pinchRef.current = null;
+    }
     panRef.current = null;
   }
 
   function onWheel(e: React.WheelEvent) {
     userMovedRef.current = true;
-    const p = toGraph(e.clientX, e.clientY);
     const factor = e.deltaY > 0 ? 1.1 : 1 / 1.1;
-    setViewBox((vb) => {
-      const w = Math.min(WIDTH * 3, Math.max(WIDTH * 0.15, vb.w * factor));
-      const h = Math.min(HEIGHT * 3, Math.max(HEIGHT * 0.15, vb.h * factor));
-      // Giữ điểm dưới con trỏ cố định.
-      const x = p.x - ((p.x - vb.x) * w) / vb.w;
-      const y = p.y - ((p.y - vb.y) * h) / vb.h;
-      return { x, y, w, h };
-    });
+    applyZoom(e.clientX, e.clientY, factor);
   }
 
   function resetView() {
