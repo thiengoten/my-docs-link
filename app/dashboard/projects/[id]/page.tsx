@@ -87,7 +87,7 @@ export default async function ProjectDetailPage({
       </div>
 
       <div className="flex flex-col gap-4 rounded-md border border-line bg-paper-raised p-6 shadow-1 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="font-display text-title font-bold text-ink">{project.name}</h1>
             <span
@@ -102,7 +102,7 @@ export default async function ProjectDetailPage({
           {project.location && <p className="text-body text-slate">Địa điểm: {project.location}</p>}
           {project.notes && <p className="mt-3 text-body text-ink-soft">{project.notes}</p>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <ProjectFormDialog mode="edit" project={project} />
           <DeleteProjectButton
             projectId={project.id}
