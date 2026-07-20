@@ -31,6 +31,7 @@ export type Project = {
   location: string | null;
   status: ProjectStatus;
   notes: string | null;
+  kuula_url: string | null;
   created_at: string;
   updated_at: string;
 };

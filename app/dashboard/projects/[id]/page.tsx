@@ -121,6 +121,22 @@ export default async function ProjectDetailPage({
         </Link>
       </div>
 
+      {project.kuula_url && (
+        <div className="space-y-3">
+          <h2 className="font-display text-subtitle font-semibold text-ink">
+            Toàn cảnh dự án
+          </h2>
+          <div className="aspect-video overflow-hidden rounded-md border border-line bg-paper-raised">
+            <iframe
+              src={project.kuula_url}
+              className="h-full w-full"
+              allow="xr-spatial-tracking; gyroscope; accelerometer"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
+
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-subtitle font-semibold text-ink">Tài liệu</h2>

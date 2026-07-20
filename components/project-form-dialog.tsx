@@ -85,6 +85,16 @@ export function ProjectFormDialog({
                 <Textarea name="notes" rows={3} defaultValue={project?.notes ?? ""} />
               </div>
 
+              <div className="space-y-1">
+                <Label>Link view 360 (Kuula)</Label>
+                <Input
+                  name="kuula_url"
+                  type="url"
+                  placeholder="https://kuula.co/share/..."
+                  defaultValue={project?.kuula_url ?? ""}
+                />
+              </div>
+
               {state.error && <FieldError>{state.error}</FieldError>}
 
               <div className="flex justify-end gap-2">
