@@ -73,6 +73,37 @@ export type Deal = {
   updated_at: string;
 };
 
+export type MapShape =
+  | { id: string; type: "polygon"; label: string; color: string; points: [number, number][] }
+  | {
+      id: string;
+      type: "pin";
+      label: string;
+      color: string;
+      position: [number, number];
+      imageUrl?: string;
+    }
+  | { id: string; type: "text"; label: string; color: string; position: [number, number] }
+  | {
+      id: string;
+      type: "line";
+      label: string;
+      color: string;
+      points: [number, number][];
+      dashed?: boolean;
+    };
+
+export type ProjectMap = {
+  id: string;
+  project_id: string;
+  center_lat: number;
+  center_lng: number;
+  zoom: number;
+  shapes: MapShape[];
+  created_at: string;
+  updated_at: string;
+};
+
 export type ShareLink = {
   id: string;
   project_id: string;
@@ -136,6 +167,12 @@ export type Database = {
         Row: Customer;
         Insert: Partial<Customer> & { name: string };
         Update: Partial<Customer>;
+        Relationships: [];
+      };
+      project_maps: {
+        Row: ProjectMap;
+        Insert: Partial<ProjectMap> & { project_id: string };
+        Update: Partial<ProjectMap>;
         Relationships: [];
       };
       deals: {

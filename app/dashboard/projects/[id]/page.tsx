@@ -119,6 +119,12 @@ export default async function ProjectDetailPage({
         >
           Xem timeline pháp lý
         </Link>
+        <Link
+          href={`/dashboard/projects/${project.id}/map`}
+          className="flex h-11 items-center rounded-md border border-line px-4 text-body text-ink hover:bg-paper-raised"
+        >
+          Bản đồ vùng đất
+        </Link>
       </div>
 
       {project.kuula_url && (
